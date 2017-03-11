@@ -13,6 +13,8 @@
     <url>http://www.techinterviewpuzzles.com/2010/09/mars-rovers-thoughtworks-puzzles.html</url>
 
     <properties>
+        <dependencies.javacc.version>7.0.5</dependencies.javacc.version>
+        <dependencies.slf4j.version>1.7.18</dependencies.slf4j.version>
         <maven.compiler.source>19</maven.compiler.source>
         <maven.compiler.target>19</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,6 +33,26 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Compile Dependencies -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${dependencies.slf4j.version}</version>
+        </dependency>
+
+        <!-- Runtime Dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${dependencies.slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -44,4 +66,31 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.javacc.plugin</groupId>
+                <artifactId>javacc-maven-plugin</artifactId>
+                <version>3.0.3</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.java.dev.javacc</groupId>
+                        <artifactId>javacc</artifactId>
+                        <version>${dependencies.javacc.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <jdkVersion>${maven.compiler.source}</jdkVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>javacc</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

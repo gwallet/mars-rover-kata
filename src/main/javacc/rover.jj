@@ -1,0 +1,105 @@
+options {
+  LOOKAHEAD = 1;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = false;
+}
+
+PARSER_BEGIN(RoversControl)
+
+package rover;
+
+import java.io.*;
+import java.util.*;
+
+public class RoversControl {
+
+    public RoversControl(String input) {
+        this(new StringReader(input));
+    }
+
+    public List<String> execute() throws ParseException {
+        return execute(new ArrayList<>());
+    }
+
+}
+PARSER_END(RoversControl)
+
+/* Basics */
+TOKEN: {
+    <SPACE: " " >
+  | <EOL: "\n" | "\r\n" | "\r" >
+  | <POSITIVE_INTEGER: ["1"-"9"] ( ["0"-"9"] )* >
+}
+
+/* Headings */
+TOKEN : {
+    <HEADING_NORTH: "N" >
+  | <HEADING_SOUTH: "S" >
+  | <HEADING_EAST:  "E" >
+  | <HEADING_WEST:  "W" >
+}
+
+/* Commands */
+TOKEN : {
+    <COMMAND_MOVE_FORWARD: "M">
+  | <COMMAND_TURN_LEFT:    "L">
+  | <COMMAND_TURN_RIGHT:   "R">
+}
+
+List<String> execute(List<String> reports):
+{
+    Integer x, y;
+    Rover rover;
+    Heading heading;
+    Command command;
+}
+{
+    <POSITIVE_INTEGER> <SPACE> <POSITIVE_INTEGER> <EOL>
+    (
+        x = integer() <SPACE> y = integer() <SPACE> heading = heading() <EOL>
+        { rover = Rover.at(x, y).headingTo(heading); }
+        ( command = command() { rover.execute(command); } ) * <EOL>
+        { reports.add(rover.toString()); rover = null; }
+    )*
+    <EOF>
+    { reports.add("=========="); return reports; }
+}
+
+Integer integer():
+{
+    Token t;
+}
+{
+    t = <POSITIVE_INTEGER> { return Integer.valueOf(t.image); }
+}
+
+Heading heading():
+{}
+{
+    <HEADING_NORTH> { return Heading.N; }
+  | <HEADING_EAST>  { return Heading.E; }
+  | <HEADING_SOUTH> { return Heading.S; }
+  | <HEADING_WEST>  { return Heading.W; }
+}
+
+Command command():
+{}
+{
+    <COMMAND_MOVE_FORWARD> { return Command.MOVE_FORWARD; }
+  | <COMMAND_TURN_LEFT>    { return Command.TURN_LEFT; }
+  | <COMMAND_TURN_RIGHT>   { return Command.TURN_RIGHT; }
+}
