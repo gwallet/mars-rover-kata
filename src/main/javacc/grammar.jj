@@ -1,0 +1,89 @@
+options
+{
+    STATIC=false;
+}
+PARSER_BEGIN(RoverCommandsParser)
+package rover;
+
+class RoverCommandsParser {
+    public static void main(String...args) throws rover.ParseException {
+        RoverCommandsParser parser = new RoverCommandsParser(System.in);
+        parser.parse(System.out);
+    }
+}
+PARSER_END(RoverCommandsParser)
+
+TOKEN: /* Basics */
+{
+    <DIGIT: (["0"-"9"])>
+  | <SPACE: (" ")>
+  | <EOL: "\n" >
+}
+
+TOKEN: /* Commands */
+{
+    <MOVE_COMMAND: ("M")> | <LEFT_COMMAND: ("L")> | <RIGHT_COMMAND: ("R")>
+  | <HEADING_NORTH: ("N")>| <HEADING_EAST: ("E")>| <HEADING_SOUTH: ("S")>| <HEADING_WEST: ("W")>
+}
+
+void parse(java.io.PrintStream out):
+{
+    Position position;
+}
+{
+    <DIGIT> <SPACE> <DIGIT> <EOL>
+    (
+        position = readPosition() <EOL>
+        move(position) <EOL>                { position.print(out); }
+    ) *                                     { out.println("=========="); }
+  | <EOL>
+}
+
+Position readPosition():
+{
+    Position position;
+    int x, y;
+    Heading h;
+}
+{
+    x = digit() <SPACE> y = digit() <SPACE> h = heading() { return new Position(x, y, h); }
+}
+
+int digit():
+{
+    int i;
+    Token t;
+}
+{
+    t = <DIGIT> { return Integer.parseInt(t.toString()); }
+}
+
+Heading heading():
+{
+    Heading h;
+    Token t;
+}
+{
+    t = <HEADING_NORTH> { return Heading.N; }
+  | t = <HEADING_EAST>  { return Heading.E; }
+  | t = <HEADING_SOUTH> { return Heading.S; }
+  | t = <HEADING_WEST>  { return Heading.W; }
+}
+
+void move(Position position):
+{
+}
+{
+    (
+        moveOnce(position)
+    )*
+}
+
+void moveOnce(Position position):
+{
+}
+{
+    <MOVE_COMMAND> { position.forward(); }
+  | <LEFT_COMMAND> { position.left(); }
+  | <RIGHT_COMMAND> { position.right(); }
+}
